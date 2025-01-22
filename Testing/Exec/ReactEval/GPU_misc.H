@@ -59,10 +59,10 @@ initialize_data(
   eos.X2Y(&X[0], &Y[0]);
 
   // T
-  temp = Temp_lo + (Temp_hi - Temp_lo) * y / L[1] +
-         dTemp * std::sin(2.0 * pi * y / P[1]);
+  temp = Temp_lo + (Temp_hi - Temp_lo) * (y-plo[1]) / L[1] +
+         dTemp * std::sin(2.0 * pi * (y-plo[1]) / P[1]);
   if (energy_type == 1) {
-    // get rho and E
+    // get rho and E  
     eos.PYT2RE(pressure, &Y[0], temp, density, energy);
   } else {
     // get rho and H

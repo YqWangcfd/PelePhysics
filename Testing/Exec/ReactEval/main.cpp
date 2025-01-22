@@ -710,7 +710,7 @@ main(int argc, char* argv[])
 
       amrex::WriteMultiLevelPlotfile(
         outfile, finest_level + 1, GetVecOfConstPtrs(mf), plt_VarsName, geoms,
-        0.0, isteps, refRatios);
+        dt, isteps, refRatios);
       BL_PROFILE_VAR_STOP(PlotFile);
     }
 

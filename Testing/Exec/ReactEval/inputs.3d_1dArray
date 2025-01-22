@@ -1,12 +1,12 @@
 ncells = 8 64 8
 max_grid_size  = 16
 plotfile = plt
-fuel_name = CH4
-reactFormat = 1dArray
+fuel_name = H2
+reactFormat = Array4
 chem_integrator = "ReactorRK64"
 
-ode.dt  = 2.e-05
-ode.ndt = 30
+ode.dt  = 1.e-07
+ode.ndt = 100
 ode.ode_ncells = 1024
 ode.reactor_type  = 1 # 1=full e, 2=full h
 ode.verbose = 1
@@ -22,11 +22,10 @@ cvode.solve_type = GMRES
 # If solve_type = precGMRES -> select preconditioner
 # Options are [CPU] dense_simplified_AJacobian / sparse_simplified_AJacobian / custom_simplified_AJacobian
 #              [GPU] cuSparse_simplified_AJacobian
-cvode.precond_type = cuSparse_simplified_AJacobian
+#cvode.precond_type = cuSparse_simplified_AJacobian
 cvode.max_order = 4
 
 #ode.implicit_solve = 1
-#ode.use_erkstep    = 0
 
 # DRM19
 #ode.typ_vals = 1.e-7 3.e-9 1.e-8 3.e-5 7.e-8 1.e-6 1.e-7 5.e-9 1.e-9 9.e-7 6.e-6 1.e-6 1.7e-8 1.9e-8 7.4e-7 6.7e-9 3.5e-7 1.6e-8 1.3e-8 1.e-4 1.8e-33 2300
@@ -38,4 +37,18 @@ amrex.fpe_trap_invalid = 1
 amrex.fpe_trap_zero = 1
 amrex.fpe_trap_overflow = 1
 
-ode.bdf_nsubsteps=40
+#amrex.max_gpu_streams = 2
+
+#ode.bdf_nsubsteps  = 40
+
+
+# Runge-Kutta 64
+ode.rk64_nsubsteps_guess = 10
+ode.rk64_nsubsteps_min = 1
+
+# Arkode
+ode.use_erkstep  = 1
+ode.rk_method    = 50
+
+
+
