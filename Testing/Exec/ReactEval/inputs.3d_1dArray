@@ -1,11 +1,11 @@
-ncells = 8 64 8
+ncells = 8 4096 8
 max_grid_size  = 16
 plotfile = plt
 fuel_name = H2
 reactFormat = Array4
 chem_integrator = "ReactorRK64"
 
-ode.dt  = 1.e-07
+ode.dt  = 1.e-06
 ode.ndt = 100
 ode.ode_ncells = 1024
 ode.reactor_type  = 1 # 1=full e, 2=full h
@@ -37,7 +37,7 @@ amrex.fpe_trap_invalid = 1
 amrex.fpe_trap_zero = 1
 amrex.fpe_trap_overflow = 1
 
-#amrex.max_gpu_streams = 2
+#amrex.max_gpu_streams = 1
 
 #ode.bdf_nsubsteps  = 40
 
@@ -45,10 +45,11 @@ amrex.fpe_trap_overflow = 1
 # Runge-Kutta 64
 ode.rk64_nsubsteps_guess = 10
 ode.rk64_nsubsteps_min = 1
+#ode.rk64_nsubsteps_max = 500
 
 # Arkode
 ode.use_erkstep  = 1
-ode.rk_method    = 50
+ode.rk_method    = 40
 
 
 

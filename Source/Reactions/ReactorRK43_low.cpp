@@ -1,26 +1,26 @@
 #include "AMReX_Reduce.H"
-#include "ReactorRK64.H"
+#include "ReactorRK43_low.H"
 
 namespace pele::physics::reactions {
 
 int
-ReactorRK64::init(int reactor_type, int /*ncells*/)
+ReactorRK43::init(int reactor_type, int /*ncells*/)
 {
-  BL_PROFILE("Pele::ReactorRK64::init()");
+  BL_PROFILE("Pele::ReactorRK43::init()");
   m_reactor_type = reactor_type;
   ReactorTypes::check_reactor_type(m_reactor_type);
   amrex::ParmParse pp("ode");
   pp.query("verbose", verbose);
   pp.query("atol", absTol);
-  pp.query("rk64_nsubsteps_guess", rk64_nsubsteps_guess);
-  pp.query("rk64_nsubsteps_min", rk64_nsubsteps_min);
-  pp.query("rk64_nsubsteps_max", rk64_nsubsteps_max);
+  pp.query("rk43_nsubsteps_guess", rk43_nsubsteps_guess);
+  pp.query("rk43_nsubsteps_min", rk43_nsubsteps_min);
+  pp.query("rk43_nsubsteps_max", rk43_nsubsteps_max);
   pp.query("clean_init_massfrac", m_clean_init_massfrac);
   return (0);
 }
 
 int
-ReactorRK64::react(
+ReactorRK43::react(
   amrex::Real* rY_in,
   amrex::Real* rYsrc_in,
   amrex::Real* rX_in,
@@ -34,7 +34,7 @@ ReactorRK64::react(
 #endif
 )
 {
-  BL_PROFILE("Pele::ReactorRK64::react()");
+  BL_PROFILE("Pele::ReactorRK43::react()");
 
   amrex::Real time_init = time;
   amrex::Real time_out = time + dt_react;
@@ -60,12 +60,12 @@ ReactorRK64::react(
 
   // capture reactor type
   const int captured_reactor_type = m_reactor_type;
-  const int captured_nsubsteps_guess = rk64_nsubsteps_guess;
-  const int captured_nsubsteps_min = rk64_nsubsteps_min;
-  const int captured_nsubsteps_max = rk64_nsubsteps_max;
+  const int captured_nsubsteps_guess = rk43_nsubsteps_guess;
+  const int captured_nsubsteps_min = rk43_nsubsteps_min;
+  const int captured_nsubsteps_max = rk43_nsubsteps_max;
   const amrex::Real captured_abstol = absTol;
   const auto* leosparm = m_d_eosparm;
-  RK64Params rkp;
+  RK43Params rkp;
 
   amrex::Gpu::DeviceVector<int> v_nsteps(ncells, 0);
   int* d_nsteps = v_nsteps.data();
@@ -101,17 +101,17 @@ ReactorRK64::react(
       for (amrex::Real& sp : error_reg) {
         sp = 0.0;
       }
-      for (int stage = 0; stage < rkp.nstages_rk64; stage++) {
+      for (int stage = 0; stage < rkp.nstages_rk43; stage++) {
         utils::fKernelSpec<Ordering>(
           0, 1, current_time - time_init, captured_reactor_type, soln_reg, ydot,
           rhoe_init, rhoesrc_ext, rYsrc_ext, leosparm);
 
         for (int sp = 0; sp < neq; sp++) {
-          error_reg[sp] += rkp.err_rk64[stage] * dt_rk * ydot[sp];
+          error_reg[sp] += rkp.err_rk43[stage] * dt_rk * ydot[sp];
           soln_reg[sp] =
-            carryover_reg[sp] + rkp.alpha_rk64[stage] * dt_rk * ydot[sp];
+            carryover_reg[sp] + rkp.alpha_rk43[stage] * dt_rk * ydot[sp];
           carryover_reg[sp] =
-            soln_reg[sp] + rkp.beta_rk64[stage] * dt_rk * ydot[sp];
+            soln_reg[sp] + rkp.beta_rk43[stage] * dt_rk * ydot[sp];
         }
       }
 
@@ -125,11 +125,11 @@ ReactorRK64::react(
 
       if (max_err < captured_abstol) {
         change_factor =
-          rkp.betaerr_rk64 * pow((captured_abstol / max_err), rkp.exp1_rk64);
+          rkp.betaerr_rk43 * pow((captured_abstol / max_err), rkp.exp1_rk43);
         dt_rk = amrex::min<amrex::Real>(dt_rk_max, dt_rk * change_factor);
       } else {
         change_factor =
-          rkp.betaerr_rk64 * pow((captured_abstol / max_err), rkp.exp2_rk64);
+          rkp.betaerr_rk43 * pow((captured_abstol / max_err), rkp.exp2_rk43);
         dt_rk = amrex::max<amrex::Real>(dt_rk_min, dt_rk * change_factor);
       }
       // Don't overstep the integration time
@@ -164,7 +164,7 @@ ReactorRK64::react(
 }
 
 int
-ReactorRK64::react(
+ReactorRK43::react(
   const amrex::Box& box,
   amrex::Array4<amrex::Real> const& rY_in,
   amrex::Array4<amrex::Real> const& rYsrc_in,
@@ -181,7 +181,7 @@ ReactorRK64::react(
 #endif
 )
 {
-  BL_PROFILE("Pele::ReactorRK64::react()");
+  BL_PROFILE("Pele::ReactorRK43::react()");
 
   amrex::Real time_init = time;
   amrex::Real time_out = time + dt_react;
@@ -189,12 +189,12 @@ ReactorRK64::react(
 
   // capture reactor type
   const int captured_reactor_type = m_reactor_type;
-  const int captured_nsubsteps_guess = rk64_nsubsteps_guess;
-  const int captured_nsubsteps_min = rk64_nsubsteps_min;
-  const int captured_nsubsteps_max = rk64_nsubsteps_max;
+  const int captured_nsubsteps_guess = rk43_nsubsteps_guess;
+  const int captured_nsubsteps_min = rk43_nsubsteps_min;
+  const int captured_nsubsteps_max = rk43_nsubsteps_max;
   const amrex::Real captured_abstol = absTol;
   const auto* leosparm = m_d_eosparm;
-  RK64Params rkp;
+  RK43Params rkp;
 
   int ncells = static_cast<int>(box.numPts());
   const auto len = amrex::length(box);
@@ -251,17 +251,17 @@ ReactorRK64::react(
       for (amrex::Real& sp : error_reg) {
         sp = 0.0;
       }
-      for (int stage = 0; stage < rkp.nstages_rk64; stage++) {
+      for (int stage = 0; stage < rkp.nstages_rk43; stage++) {
         utils::fKernelSpec<Ordering>(
           0, 1, current_time - time_init, captured_reactor_type, soln_reg, ydot,
           rhoe_init, rhoesrc_ext, rYsrc_ext, leosparm);
 
         for (int sp = 0; sp < neq; sp++) {
-          error_reg[sp] += rkp.err_rk64[stage] * dt_rk * ydot[sp];
+          error_reg[sp] += rkp.err_rk43[stage] * dt_rk * ydot[sp];
           soln_reg[sp] =
-            carryover_reg[sp] + rkp.alpha_rk64[stage] * dt_rk * ydot[sp];
+            carryover_reg[sp] + rkp.alpha_rk43[stage] * dt_rk * ydot[sp];
           carryover_reg[sp] =
-            soln_reg[sp] + rkp.beta_rk64[stage] * dt_rk * ydot[sp];
+            soln_reg[sp] + rkp.beta_rk43[stage] * dt_rk * ydot[sp];
         }
       }
 
@@ -275,16 +275,15 @@ ReactorRK64::react(
 
       if (max_err < captured_abstol) {
         change_factor =
-          rkp.betaerr_rk64 * pow((captured_abstol / max_err), rkp.exp1_rk64);
+          rkp.betaerr_rk43 * pow((captured_abstol / max_err), rkp.exp1_rk43);
         dt_rk = amrex::min<amrex::Real>(dt_rk_max, dt_rk * change_factor);
       } else {
         change_factor =
-          rkp.betaerr_rk64 * pow((captured_abstol / max_err), rkp.exp2_rk64);
+          rkp.betaerr_rk43 * pow((captured_abstol / max_err), rkp.exp2_rk43);
         dt_rk = amrex::max<amrex::Real>(dt_rk_min, dt_rk * change_factor);
       }
-      
-      // amrex::Print() << "The time step is " << dt_rk << std::endl;
 
+      // amrex::Print() << "The time step is " << dt_rk << std::endl;
 
       // Don't overstep the integration time
       dt_rk = amrex::min<amrex::Real>(dt_rk, time_out - current_time);
