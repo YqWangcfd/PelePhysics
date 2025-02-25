@@ -1,9 +1,9 @@
 ncells = 8 4096 8
-max_grid_size  = 16
+max_grid_size  = 4096
 plotfile = plt
 fuel_name = H2
 reactFormat = Array4
-chem_integrator = "ReactorRK64"
+chem_integrator = "ReactorRK43"
 
 ode.dt  = 1.e-06
 ode.ndt = 100
@@ -11,8 +11,8 @@ ode.ode_ncells = 1024
 ode.reactor_type  = 1 # 1=full e, 2=full h
 ode.verbose = 1
 ode.use_typ_vals = 0
-ode.rtol = 1e-10
-ode.atol = 1e-10
+ode.rtol = 1e-8
+ode.atol = 1e-8
 
 # Select Linear solver for CVODE Newton direction
 # Options are [CPU] dense_direct / denseAJ_direct / sparse_direct / custom_direct / GMRES / precGMRES
@@ -37,15 +37,16 @@ amrex.fpe_trap_invalid = 1
 amrex.fpe_trap_zero = 1
 amrex.fpe_trap_overflow = 1
 
-#amrex.max_gpu_streams = 1
+amrex.max_gpu_streams = 4
+amrex.abort_on_out_of_gpu_memory = 1
 
 #ode.bdf_nsubsteps  = 40
 
 
-# Runge-Kutta 64
-ode.rk64_nsubsteps_guess = 10
-ode.rk64_nsubsteps_min = 1
-#ode.rk64_nsubsteps_max = 500
+# Runge-Kutta 43
+ode.rk43_nsubsteps_guess = 10
+ode.rk43_nsubsteps_min = 1
+#ode.rk43_nsubsteps_max = 500
 
 # Arkode
 ode.use_erkstep  = 1
