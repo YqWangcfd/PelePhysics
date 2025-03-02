@@ -133,7 +133,7 @@ private:
   amrex::Real absTol{1e-10};
   int rk54_nsubsteps_guess{10};
   int rk54_nsubsteps_min{5};
-  int rk54_nsubsteps_max{50};
+  int rk54_nsubsteps_max{500};
   utils::FlattenOps<Ordering> flatten_ops;
   int m_reactor_type{0};
   bool m_clean_init_massfrac{false};
