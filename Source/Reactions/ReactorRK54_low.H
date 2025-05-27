@@ -130,6 +130,7 @@ public:
   }
 
 private:
+  amrex::Real relTol{1e-6};
   amrex::Real absTol{1e-10};
   int rk54_nsubsteps_guess{10};
   int rk54_nsubsteps_min{5};
