@@ -79,7 +79,7 @@ template <typename OrderType>
 void
 set_sundials_solver_tols(
   // cppcheck-suppress constParameter
-  sundials::Context& sunctx,
+  ::sundials::Context& sunctx,
   void* sundials_mem,
   const int ncells,
   const amrex::Real relTol,
