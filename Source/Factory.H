@@ -112,11 +112,10 @@ struct Factory
 
     ~Register() override
     {
-      if (registered) {
-        const auto& tbl = Factory::table();
-        const auto& it = tbl.find(T::identifier());
-        registered = (it != tbl.end());
-      }
+      // Do not touch Factory::table() here.
+      // Static destruction order across translation units is unspecified, and
+      // the lookup table may already be destroyed when this runs.
+      registered = false;
     }
 
   private:
@@ -149,8 +148,10 @@ private:
   //! Lookup table containing all registered instances
   static LookupTable& table()
   {
-    static LookupTable tbl;
-    return tbl;
+    // Keep the registry alive until process exit to avoid static deinit order
+    // issues (e.g. Register<T> dtors running after tbl dtor).
+    static LookupTable* tbl = new LookupTable();
+    return *tbl;
   }
 
   Factory() = default;
